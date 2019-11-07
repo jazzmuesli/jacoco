@@ -131,13 +131,23 @@ public class TestMetricsCollector {
 					+ jacocoDestFilename);
 			TestMetricsCollector.baseFileName = jacocoDestFilename;
 			TestMetricsCollector.LOG = logger;
-			return new TestObservingClassVisitor(nextVisitor,
-					new ClassAcceptor(jacocoDestFilename, logger));
+			final ClassAcceptor classManager = new ClassAcceptor(
+					jacocoDestFilename, logger);
+			return new TestObservingClassVisitor(nextVisitor, classManager);
 
 		} catch (final Exception e) {
 			logger.logExeption(e);
 			return nextVisitor;
 		}
+	}
+
+	public static void shutdown() {
+		try {
+			dumpTestingArtifacts();
+		} catch (final Exception e) {
+			LOG.logExeption(e);
+		}
+		LOG.flush();
 	}
 
 }

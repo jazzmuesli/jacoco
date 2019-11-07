@@ -37,7 +37,7 @@ public final class TestMetricsGatheringPreMainBuilder extends PremainBuilder {
 			@Override
 			public void run() {
 				try {
-					TestMetricsCollector.dumpTestingArtifacts();
+					TestMetricsCollector.shutdown();
 				} catch (final Exception e) {
 					exceptionLogger.logExeption(e);
 				}

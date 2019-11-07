@@ -63,4 +63,8 @@ public class Logger implements IExceptionLogger {
 		return new Logger(new PrintWriter(System.out),
 				IExceptionLogger.SYSTEM_ERR);
 	}
+
+	public void flush() {
+		printWriter.flush();
+	}
 }

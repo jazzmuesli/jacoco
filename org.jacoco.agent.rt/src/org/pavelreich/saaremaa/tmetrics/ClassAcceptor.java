@@ -35,9 +35,6 @@ public class ClassAcceptor {
 	public ClassAcceptor(final String jacocoDestFilename, final Logger logger) {
 		this.logger = logger;
 		this.jacocoDestFilename = jacocoDestFilename;
-	}
-
-	public void load() {
 		loadClasses(new File(
 				jacocoDestFilename.replaceAll(".exec", "-classes.txt")));
 		loadClasses(new File("classes.txt"));
