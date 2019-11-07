@@ -33,10 +33,13 @@ class SourceLocation {
 	}
 
 	public Document toDocument() {
-		return new Document("type", getClass().getName())
+		Document doc = new Document("type", getClass().getName())
 				.append("className", visitClassRecord.name.replace('/', '.'))
 				.append("methodName", visitMethodRecord.methodName)
-				.append("methodSignature", visitMethodRecord.signature)
 				.append("line", currentLine);
+		if (visitMethodRecord.signature != null) {
+			doc = doc.append("methodSignature", visitMethodRecord.signature);
+		}
+		return doc;
 	}
 }
