@@ -51,21 +51,20 @@ public class Agent implements IAgent {
 	 */
 	public static synchronized Agent getInstance(final AgentOptions options)
 			throws Exception {
-		// return getInstance(options, null);
-		// }
-		//
-		// public static synchronized Agent getInstance(final AgentOptions
-		// options,
-		// final Runnable shutdownAction) throws Exception {
+		return getInstance(options, null);
+	}
+
+	public static synchronized Agent getInstance(final AgentOptions options,
+			final Runnable shutdownAction) throws Exception {
 		if (singleton == null) {
 			final Agent agent = new Agent(options, IExceptionLogger.SYSTEM_ERR);
 			agent.startup();
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
 				public void run() {
-					// if (shutdownAction != null) {
-					// shutdownAction.run();
-					// }
+					if (shutdownAction != null) {
+						shutdownAction.run();
+					}
 					agent.shutdown();
 				}
 			});

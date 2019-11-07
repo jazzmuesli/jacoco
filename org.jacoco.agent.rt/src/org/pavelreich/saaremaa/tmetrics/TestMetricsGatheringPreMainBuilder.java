@@ -32,7 +32,7 @@ public final class TestMetricsGatheringPreMainBuilder extends PremainBuilder {
 
 	@Override
 	public Runnable createShutdownAction() {
-		if (true) {
+		if (false) {
 			return null;
 		} else {
 			return new Runnable() {

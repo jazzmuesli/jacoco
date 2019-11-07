@@ -35,7 +35,8 @@ public class PremainBuilder {
 			throws Exception {
 		final AgentOptions agentOptions = new AgentOptions(options);
 
-		final Agent agent = Agent.getInstance(agentOptions);// createShutdownAction());
+		final Agent agent = Agent.getInstance(agentOptions,
+				createShutdownAction());
 
 		final IRuntime runtime = createRuntime(inst);
 		runtime.startup(agent.getData());

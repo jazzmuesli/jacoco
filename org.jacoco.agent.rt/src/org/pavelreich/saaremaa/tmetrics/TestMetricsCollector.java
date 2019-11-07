@@ -122,14 +122,16 @@ public class TestMetricsCollector {
 
 	public static List<Document> dumpTestingArtifacts()
 			throws FileNotFoundException {
-		final PrintWriter jsonWriter = new PrintWriter(
-				baseFileName.replaceAll(".exec", "-result.json"));
+		final String fname = baseFileName.replaceAll(".exec", "-result.json");
+		final PrintWriter jsonWriter = new PrintWriter(fname);
+		printWriter.println("dumpTestingArtifacts: " + fname);
 		final JsonWriterSettings writerSettings = JsonWriterSettings.builder()
 				.indent(true).build();
 		final List<Document> docs = new ArrayList<Document>();
 		for (final TestingArtifact s : occurences) {
 			docs.add(s.toDocument());
 		}
+		printWriter.println("docs: " + docs.size());
 
 		final BsonTypeClassMap bsonTypeClassMap = new BsonTypeClassMap();
 		final CodecRegistry registry = CodecRegistries.fromProviders(
@@ -365,12 +367,12 @@ public class TestMetricsCollector {
 		}
 	}
 
-	static class SimpleTestObservingMethodVisitor extends MethodVisitor {
+	static class XSimpleTestObservingMethodVisitor extends MethodVisitor {
 		private final VisitClassRecord visitClassRecord;
 		private final VisitMethodRecord visitMethodRecord;
 		private int currentLine = -1;
 
-		public SimpleTestObservingMethodVisitor(
+		public XSimpleTestObservingMethodVisitor(
 				final VisitClassRecord visitClassRecord,
 				final VisitMethodRecord visitMethodRecord,
 				final MethodVisitor nextVisitor) {
