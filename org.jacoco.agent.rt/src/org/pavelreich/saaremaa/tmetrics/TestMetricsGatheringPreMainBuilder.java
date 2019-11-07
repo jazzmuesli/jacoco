@@ -32,22 +32,18 @@ public final class TestMetricsGatheringPreMainBuilder extends PremainBuilder {
 
 	@Override
 	public Runnable createShutdownAction() {
-		if (false) {
-			return null;
-		} else {
-			return new Runnable() {
+		return new Runnable() {
 
-				@Override
-				public void run() {
-					try {
-						TestMetricsCollector.dumpTestingArtifacts();
-					} catch (final Exception e) {
-						exceptionLogger.logExeption(e);
-					}
+			@Override
+			public void run() {
+				try {
+					TestMetricsCollector.dumpTestingArtifacts();
+				} catch (final Exception e) {
+					exceptionLogger.logExeption(e);
 				}
+			}
 
-			};
-		}
+		};
 	}
 
 	@Override
