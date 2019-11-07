@@ -65,10 +65,6 @@ public class CoverageTransformer implements ClassFileTransformer {
 		this(runtime, options, logger, new DefaultInstrumenterFactory());
 	}
 
-	static interface InstrumenterFactory {
-		Instrumenter create(IRuntime runtime);
-	}
-
 	static class DefaultInstrumenterFactory implements InstrumenterFactory {
 
 		@Override

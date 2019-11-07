@@ -14,9 +14,9 @@ package org.pavelreich.saaremaa.tmetrics;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -38,16 +38,17 @@ import org.bson.codecs.IterableCodecProvider;
 import org.bson.codecs.ValueCodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.json.JsonMode;
 import org.bson.json.JsonWriter;
 import org.bson.json.JsonWriterSettings;
 import org.jacoco.agent.rt.internal.IExceptionLogger;
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.util.TraceClassVisitor;
 
 /**
  * load list of prod/test classes to analyse from jacoco-classes.txt or
@@ -76,6 +77,22 @@ public class TestMetricsCollector {
 	private static final Set<String> relevantClasses = new HashSet<String>();
 	private static String baseFileName;
 
+	public static void main(final String[] args) {
+		ClassReader reader;
+		try {
+			reader = new ClassReader(TestMetricsCollector.class.getName());
+			final ClassVisitor visitor = TestMetricsCollector
+					.provideClassVisitor(new TraceClassVisitor(printWriter),
+							"banana.exec", IExceptionLogger.SYSTEM_ERR);
+			reader.accept(visitor, 0);
+			dumpTestingArtifacts();
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 	private static void loadClasses(final File f) {
 
 		if (f.exists()) {
@@ -98,9 +115,9 @@ public class TestMetricsCollector {
 
 	public static void dumpTestingArtifacts() throws FileNotFoundException {
 		final PrintWriter jsonWriter = new PrintWriter(
-				baseFileName.replaceAll(".exec", "-result.json"));
-		final JsonWriterSettings writerSettings = new JsonWriterSettings(
-				JsonMode.SHELL, true);
+				baseFileName.replaceAll(".exec", "-result.json")); // final
+		final JsonWriterSettings writerSettings = JsonWriterSettings.builder()
+				.indent(true).build();
 		final List<Document> docs = new ArrayList<Document>();
 		for (final TestingArtifact s : occurences) {
 			docs.add(s.toDocument());
@@ -337,8 +354,9 @@ public class TestMetricsCollector {
 
 	static class TestObservingMethodVisitor extends MethodVisitor {
 
-		private static final Set<String> ASSERT_CLASSES = new HashSet<String>(
-				Arrays.asList("org.junit.Assert", "junit.framework.Assert"));
+		// private static final Set<String> ASSERT_CLASSES = new
+		// HashSet<String>(
+		// Arrays.asList("org.junit.Assert", "junit.framework.Assert"));
 		private final VisitClassRecord visitClassRecord;
 		private final VisitMethodRecord visitMethodRecord;
 		private int currentLine;
@@ -360,7 +378,7 @@ public class TestMetricsCollector {
 					+ owner + ", name: " + methodName);
 			// TODO: add hamcrest, etc.
 			final String ownerClassName = owner.replace('/', '.');
-			if (ASSERT_CLASSES.contains(ownerClassName)) {
+			if ("org.junit.Assert".equals(ownerClassName)) {
 				occurences.add(new TAssert(getSourceLocation(),
 						new TargetLocation(ownerClassName, methodName)));
 			}
