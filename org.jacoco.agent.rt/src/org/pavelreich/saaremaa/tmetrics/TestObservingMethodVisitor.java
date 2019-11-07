@@ -49,13 +49,14 @@ class TestObservingMethodVisitor extends MethodVisitor {
 			final boolean isInterface) {
 		final String ownerClassName = owner.replace('/', '.');
 		if (ASSERT_CLASSES.contains(ownerClassName)) {
-			TestMetricsCollector.occurences.add(new TAssert(getSourceLocation(),
-					new TargetLocation(ownerClassName, methodName)));
+			TestMetricsCollector.occurences
+					.add(new TAssert(getSourceLocation(), new TargetLocation(
+							ownerClassName, methodName, descriptor)));
 		}
 		if (MOCKITO_CLASSES.contains(ownerClassName)) {
-			TestMetricsCollector.occurences
-					.add(new TMockOperation(getSourceLocation(),
-							new TargetLocation(ownerClassName, methodName)));
+			TestMetricsCollector.occurences.add(
+					new TMockOperation(getSourceLocation(), new TargetLocation(
+							ownerClassName, methodName, descriptor)));
 		}
 		final boolean isClassRelevant = relevantClassManager
 				.isClassRelevant(ownerClassName);
@@ -64,7 +65,7 @@ class TestObservingMethodVisitor extends MethodVisitor {
 					|| opcode == Opcodes.INVOKESTATIC) {
 				final SourceLocation sourceLocation = getSourceLocation();
 				final TargetLocation targetLocation = new TargetLocation(
-						ownerClassName, methodName);
+						ownerClassName, methodName, descriptor);
 				TestMetricsCollector.occurences.add(
 						new TInvok(sourceLocation, targetLocation, opcode));
 			}

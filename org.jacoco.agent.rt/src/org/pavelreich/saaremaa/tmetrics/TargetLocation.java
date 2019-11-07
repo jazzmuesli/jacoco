@@ -17,11 +17,13 @@ class TargetLocation {
 
 	private final String className;
 	private final String methodName;
+	private final String descriptor;
 
-	public TargetLocation(final String ownerClassName,
-			final String methodName) {
+	public TargetLocation(final String ownerClassName, final String methodName,
+			final String descriptor) {
 		this.className = ownerClassName;
 		this.methodName = methodName;
+		this.descriptor = descriptor;
 	}
 
 	@Override
@@ -31,7 +33,7 @@ class TargetLocation {
 
 	public Document toDocument() {
 		return new Document("type", getClass().getName())
-				.append("className", className)
+				.append("className", className).append("descriptor", descriptor)
 				.append("methodName", methodName);
 	}
 }

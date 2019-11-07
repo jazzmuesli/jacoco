@@ -36,6 +36,7 @@ class SourceLocation {
 		return new Document("type", getClass().getName())
 				.append("className", visitClassRecord.name.replace('/', '.'))
 				.append("methodName", visitMethodRecord.methodName)
+				.append("methodSignature", visitMethodRecord.signature)
 				.append("line", currentLine);
 	}
 }
