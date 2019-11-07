@@ -12,6 +12,11 @@
  *******************************************************************************/
 package org.pavelreich.saaremaa.tmetrics;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
+
 import org.jacoco.agent.rt.internal.IExceptionLogger;
 import org.jacoco.agent.rt.internal.InstrumenterFactory;
 import org.jacoco.core.instr.Instrumenter;
@@ -20,6 +25,8 @@ import org.jacoco.core.internal.instr.IProbeArrayStrategy;
 import org.jacoco.core.runtime.AgentOptions;
 import org.jacoco.core.runtime.IRuntime;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.util.Textifier;
+import org.objectweb.asm.util.TraceClassVisitor;
 
 public class TracingInstrumenterFactory implements InstrumenterFactory {
 	private final String jacocoDestFileName;
@@ -46,8 +53,20 @@ public class TracingInstrumenterFactory implements InstrumenterFactory {
 	}
 
 	protected ClassVisitor chainVisitor(final ClassVisitor nextVisitor) {
-		final ClassVisitor visitor = TestMetricsCollector.provideClassVisitor(
-				nextVisitor, jacocoDestFileName, exceptionLogger);
-		return visitor;
+		FileWriter fw;
+		try {
+			final ClassVisitor metricsVisitor = TestMetricsCollector
+					.provideClassVisitor(nextVisitor, jacocoDestFileName,
+							exceptionLogger);
+			fw = new FileWriter(jacocoDestFileName.replace(".exec", ".txt"),
+					true);
+			final PrintWriter printWriter = new PrintWriter(fw);
+			printWriter.println("banana:" + new Date());
+			final TraceClassVisitor visitor = new TraceClassVisitor(
+					metricsVisitor, new Textifier(), printWriter);
+			return visitor;
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

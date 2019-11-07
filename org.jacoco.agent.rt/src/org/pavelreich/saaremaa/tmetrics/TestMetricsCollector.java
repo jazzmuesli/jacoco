@@ -14,10 +14,12 @@ package org.pavelreich.saaremaa.tmetrics;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -69,13 +71,13 @@ import org.objectweb.asm.util.TraceClassVisitor;
  *
  */
 public class TestMetricsCollector {
-	private static final Collection<TestingArtifact> occurences = new LinkedHashSet<TestingArtifact>();
-	private static final int ASM_VERSION = Opcodes.ASM7;
+	public static final Collection<TestingArtifact> occurences = new LinkedHashSet<TestingArtifact>();
+	public static final int ASM_VERSION = Opcodes.ASM7;
 
-	private static PrintWriter printWriter = new PrintWriter(System.out);
+	public static PrintWriter printWriter = new PrintWriter(System.out);
 
-	private static final Set<String> relevantClasses = new HashSet<String>();
-	private static String baseFileName;
+	public static final Set<String> relevantClasses = new HashSet<String>();
+	public static String baseFileName = "banana.exec";
 
 	public static void main(final String[] args) {
 		ClassReader reader;
@@ -85,7 +87,10 @@ public class TestMetricsCollector {
 					.provideClassVisitor(new TraceClassVisitor(printWriter),
 							"banana.exec", IExceptionLogger.SYSTEM_ERR);
 			reader.accept(visitor, 0);
-			dumpTestingArtifacts();
+			final List<Document> dumpTestingArtifacts = dumpTestingArtifacts();
+			for (final Document ta : dumpTestingArtifacts) {
+				System.out.println(ta);
+			}
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -110,12 +115,15 @@ public class TestMetricsCollector {
 			} catch (final Exception e) {
 				e.printStackTrace(printWriter);
 			}
+		} else {
+			printWriter.println("file " + f + " not present");
 		}
 	}
 
-	public static void dumpTestingArtifacts() throws FileNotFoundException {
+	public static List<Document> dumpTestingArtifacts()
+			throws FileNotFoundException {
 		final PrintWriter jsonWriter = new PrintWriter(
-				baseFileName.replaceAll(".exec", "-result.json")); // final
+				baseFileName.replaceAll(".exec", "-result.json"));
 		final JsonWriterSettings writerSettings = JsonWriterSettings.builder()
 				.indent(true).build();
 		final List<Document> docs = new ArrayList<Document>();
@@ -139,6 +147,7 @@ public class TestMetricsCollector {
 
 		bsonWriter.flush();
 		jsonWriter.close();
+		return docs;
 	}
 
 	/**
@@ -154,13 +163,17 @@ public class TestMetricsCollector {
 			final ClassVisitor nextVisitor, final String jacocoDestFilename,
 			final IExceptionLogger exceptionLogger) {
 		try {
-			TestMetricsCollector.baseFileName = jacocoDestFilename;
 			final String logFname = jacocoDestFilename.replaceAll(".exec",
 					".log");
-			printWriter = new PrintWriter(new File(logFname));
+			printWriter = new PrintWriter(new FileWriter(logFname, true));
+			printWriter.println("hello:" + new Date());
+			printWriter.flush();
+			TestMetricsCollector.baseFileName = jacocoDestFilename;
 			loadClasses(new File(
 					jacocoDestFilename.replaceAll(".exec", "-classes.txt")));
 			loadClasses(new File("classes.txt"));
+			printWriter.println("loaded");
+			printWriter.flush();
 		} catch (final Exception e) {
 			exceptionLogger.logExeption(e);
 		}
@@ -352,6 +365,73 @@ public class TestMetricsCollector {
 		}
 	}
 
+	static class SimpleTestObservingMethodVisitor extends MethodVisitor {
+		private final VisitClassRecord visitClassRecord;
+		private final VisitMethodRecord visitMethodRecord;
+		private int currentLine = -1;
+
+		public SimpleTestObservingMethodVisitor(
+				final VisitClassRecord visitClassRecord,
+				final VisitMethodRecord visitMethodRecord,
+				final MethodVisitor nextVisitor) {
+			super(ASM_VERSION, nextVisitor);
+			printWriter.println(
+					"SimpleTestObservingMethodVisitor.visitClassRecord: "
+							+ visitClassRecord + ", method: "
+							+ visitMethodRecord);
+			this.visitClassRecord = visitClassRecord;
+			this.visitMethodRecord = visitMethodRecord;
+		}
+
+		@Override
+		public void visitLineNumber(final int line, final Label start) {
+			this.currentLine = line;
+			printWriter.println("currentLine: " + line);
+			super.visitLineNumber(line, start);
+		}
+
+		protected SourceLocation getSourceLocation() {
+			final SourceLocation sourceLocation = new SourceLocation(
+					visitClassRecord, visitMethodRecord, currentLine);
+			return sourceLocation;
+		}
+
+		@Override
+		public void visitMethodInsn(final int opcode, final String owner,
+				final String methodName, final String descriptor,
+				final boolean isInterface) {
+			final String ownerClassName = owner.replace('/', '.');
+			printWriter.println(toString() + ". opcode: " + opcode + ", owner: "
+					+ owner + ", name: " + methodName);
+			if (false) {
+				// // TODO: add hamcrest, etc.
+				// if ("org.junit.Assert".equals(ownerClassName)) {
+				// occurences.add(new TAssert(getSourceLocation(),
+				// new TargetLocation(ownerClassName, methodName)));
+				// }
+				// if ("org.mockito.Mockito".equals(ownerClassName)) {
+				// occurences.add(new TMockOperation(getSourceLocation(),
+				// new TargetLocation(ownerClassName, methodName)));
+				// }
+				// final boolean isClassRelevant =
+				// isClassRelevant(ownerClassName);
+				// if (isClassRelevant) {
+				// if (opcode == Opcodes.INVOKEVIRTUAL
+				// || opcode == Opcodes.INVOKESTATIC) {
+				// final SourceLocation sourceLocation = getSourceLocation();
+				// final TargetLocation targetLocation = new TargetLocation(
+				// ownerClassName, methodName);
+				// occurences.add(new TInvok(sourceLocation,
+				// targetLocation, opcode));
+				// }
+				// }
+				//
+			}
+			super.visitMethodInsn(opcode, owner, methodName, descriptor,
+					isInterface);
+		}
+	}
+
 	static class TestObservingMethodVisitor extends MethodVisitor {
 
 		// private static final Set<String> ASSERT_CLASSES = new
@@ -366,6 +446,8 @@ public class TestMetricsCollector {
 				final VisitMethodRecord visitMethodRecord,
 				final MethodVisitor nextVisitor) {
 			super(ASM_VERSION, nextVisitor);
+			printWriter.println("visitClassRecord: " + visitClassRecord
+					+ ", method: " + visitMethodRecord);
 			this.visitClassRecord = visitClassRecord;
 			this.visitMethodRecord = visitMethodRecord;
 		}
@@ -374,31 +456,34 @@ public class TestMetricsCollector {
 		public void visitMethodInsn(final int opcode, final String owner,
 				final String methodName, final String descriptor,
 				final boolean isInterface) {
+			final String ownerClassName = owner.replace('/', '.');
 			printWriter.println(toString() + ". opcode: " + opcode + ", owner: "
 					+ owner + ", name: " + methodName);
-			// TODO: add hamcrest, etc.
-			final String ownerClassName = owner.replace('/', '.');
-			if ("org.junit.Assert".equals(ownerClassName)) {
-				occurences.add(new TAssert(getSourceLocation(),
-						new TargetLocation(ownerClassName, methodName)));
-			}
-			if ("org.mockito.Mockito".equals(ownerClassName)) {
-				occurences.add(new TMockOperation(getSourceLocation(),
-						new TargetLocation(ownerClassName, methodName)));
-			}
-			final boolean isClassRelevant = isClassRelevant(ownerClassName);
-			if (isClassRelevant) {
-				if (opcode == Opcodes.INVOKEVIRTUAL
-						|| opcode == Opcodes.INVOKESTATIC) {
-					final SourceLocation sourceLocation = getSourceLocation();
-					final TargetLocation targetLocation = new TargetLocation(
-							ownerClassName, methodName);
-					occurences.add(
-							new TInvok(sourceLocation, targetLocation, opcode));
+			if (true) {
+				// TODO: add hamcrest, etc.
+				if ("org.junit.Assert".equals(ownerClassName)) {
+					occurences.add(new TAssert(getSourceLocation(),
+							new TargetLocation(ownerClassName, methodName)));
 				}
+				if ("org.mockito.Mockito".equals(ownerClassName)) {
+					occurences.add(new TMockOperation(getSourceLocation(),
+							new TargetLocation(ownerClassName, methodName)));
+				}
+				final boolean isClassRelevant = isClassRelevant(ownerClassName);
+				if (isClassRelevant) {
+					if (opcode == Opcodes.INVOKEVIRTUAL
+							|| opcode == Opcodes.INVOKESTATIC) {
+						final SourceLocation sourceLocation = getSourceLocation();
+						final TargetLocation targetLocation = new TargetLocation(
+								ownerClassName, methodName);
+						occurences.add(new TInvok(sourceLocation,
+								targetLocation, opcode));
+					}
+				}
+
 			}
-			super.visitMethodInsn(opcode, ownerClassName, methodName,
-					descriptor, isInterface);
+			super.visitMethodInsn(opcode, owner, methodName, descriptor,
+					isInterface);
 		}
 
 		protected SourceLocation getSourceLocation() {
@@ -420,8 +505,10 @@ public class TestMetricsCollector {
 
 		@Override
 		public void visitTypeInsn(final int opcode, final String type) {
-			if (isClassRelevant(type) && opcode == Opcodes.NEW) {
-				occurences.add(new TData(getSourceLocation(), type));
+			if (true) {
+				if (isClassRelevant(type) && opcode == Opcodes.NEW) {
+					occurences.add(new TData(getSourceLocation(), type));
+				}
 			}
 			printWriter.println(
 					"visitTypeInsn:opcode=" + opcode + ", type= " + type);
@@ -460,6 +547,9 @@ public class TestMetricsCollector {
 
 		public TestObservingClassVisitor(final ClassVisitor nextVisitor) {
 			super(ASM_VERSION, nextVisitor);
+			printWriter.println("TestObservingClassVisitor: " + nextVisitor);
+			printWriter.flush();
+
 		}
 
 		@Override
@@ -474,17 +564,13 @@ public class TestMetricsCollector {
 		}
 
 		@Override
-		public AnnotationVisitor visitAnnotation(final String descriptor,
-				final boolean visible) {
-			return super.visitAnnotation(descriptor, visible);
-		}
-
-		@Override
 		public void visit(final int version, final int access,
 				final String name, final String signature,
 				final String superName, final String[] interfaces) {
 			this.visitClassRecord = new VisitClassRecord(version, access, name,
 					signature, superName, interfaces);
+			printWriter.println("visit: " + name);
+			printWriter.flush();
 			super.visit(version, access, name, signature, superName,
 					interfaces);
 		}
@@ -503,8 +589,16 @@ public class TestMetricsCollector {
 					methodName, descriptor, signature, exceptions);
 			final VisitMethodRecord visitMethodRecord = new VisitMethodRecord(
 					access, methodName, descriptor, signature, exceptions);
-			return new TestObservingMethodVisitor(visitClassRecord,
-					visitMethodRecord, nextVisitor);
+			printWriter.println("visitMethod: " + methodName);
+			printWriter.flush();
+
+			if (false) {
+				return nextVisitor;
+			} else {
+				return new TestObservingMethodVisitor(visitClassRecord,
+						visitMethodRecord, nextVisitor);
+
+			}
 		}
 
 	}
@@ -527,6 +621,7 @@ public class TestMetricsCollector {
 		public VisitClassRecord(final int version, final int access,
 				final String name, final String signature,
 				final String superName, final String[] interfaces) {
+			super();
 			this.version = version;
 			this.access = access;
 			this.name = name;
@@ -547,6 +642,7 @@ public class TestMetricsCollector {
 		public VisitFieldRecord(final int access, final String name,
 				final String descriptor, final String signature,
 				final Object value) {
+			super();
 			this.access = access;
 			this.name = name;
 			this.descriptor = descriptor;
@@ -566,6 +662,7 @@ public class TestMetricsCollector {
 		public VisitMethodRecord(final int access, final String methodName,
 				final String descriptor, final String signature,
 				final String[] exceptions) {
+			super();
 			this.access = access;
 			this.methodName = methodName;
 			this.descriptor = descriptor;

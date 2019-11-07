@@ -28,22 +28,26 @@ import org.jacoco.core.runtime.IRuntime;
  *
  */
 public final class TestMetricsGatheringPreMainBuilder extends PremainBuilder {
-	final IExceptionLogger exceptionLogger = IExceptionLogger.SYSTEM_ERR;
+	public static final IExceptionLogger exceptionLogger = IExceptionLogger.SYSTEM_ERR;
 
 	@Override
-	protected Runnable createShutdownAction() {
-		return new Runnable() {
+	public Runnable createShutdownAction() {
+		if (true) {
+			return null;
+		} else {
+			return new Runnable() {
 
-			@Override
-			public void run() {
-				try {
-					TestMetricsCollector.dumpTestingArtifacts();
-				} catch (final Exception e) {
-					exceptionLogger.logExeption(e);
+				@Override
+				public void run() {
+					try {
+						TestMetricsCollector.dumpTestingArtifacts();
+					} catch (final Exception e) {
+						exceptionLogger.logExeption(e);
+					}
 				}
-			}
 
-		};
+			};
+		}
 	}
 
 	@Override

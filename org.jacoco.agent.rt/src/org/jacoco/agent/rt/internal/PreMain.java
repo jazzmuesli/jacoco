@@ -14,6 +14,8 @@ package org.jacoco.agent.rt.internal;
 
 import java.lang.instrument.Instrumentation;
 
+import org.pavelreich.saaremaa.tmetrics.TestMetricsGatheringPreMainBuilder;
+
 /**
  * The agent which is referred as the <code>Premain-Class</code>. The agent
  * configuration is provided with the agent parameters in the command line.
@@ -37,7 +39,7 @@ public final class PreMain {
 	public static void premain(final String options, final Instrumentation inst)
 			throws Exception {
 
-		final PremainBuilder premainBuilder = new PremainBuilder();
+		final PremainBuilder premainBuilder = new TestMetricsGatheringPreMainBuilder();
 		premainBuilder.premain(options, inst);
 	}
 

@@ -47,7 +47,7 @@ public class PremainBuilder {
 	 *
 	 * @return
 	 */
-	protected Runnable createShutdownAction() {
+	public Runnable createShutdownAction() {
 		return null;
 	}
 
