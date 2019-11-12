@@ -31,4 +31,12 @@ public class TAssert extends TestingArtifact {
 				.append("sourceLocation", sourceLocation.toDocument())
 				.append("targetLocation", targetLocation.toDocument());
 	}
+
+	public SourceLocation getSourceLocation() {
+		return sourceLocation;
+	}
+
+	public TargetLocation getTargetLocation() {
+		return targetLocation;
+	}
 }

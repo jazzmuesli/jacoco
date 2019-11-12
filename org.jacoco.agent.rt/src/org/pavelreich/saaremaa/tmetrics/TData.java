@@ -28,4 +28,12 @@ class TData extends TestingArtifact {
 				.append("sourceLocation", sourceLocation.toDocument())
 				.append("dataType", type);
 	}
+
+	public SourceLocation getSourceLocation() {
+		return sourceLocation;
+	}
+
+	String getDataType() {
+		return type;
+	}
 }

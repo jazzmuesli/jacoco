@@ -28,18 +28,31 @@ class SourceLocation {
 
 	@Override
 	public String toString() {
-		return visitClassRecord.name + ":" + visitMethodRecord.methodName + ":"
+		return visitClassRecord.name + ":" + getMethodName() + ":"
 				+ currentLine;
 	}
 
 	public Document toDocument() {
 		Document doc = new Document("type", getClass().getName())
-				.append("className", visitClassRecord.name.replace('/', '.'))
-				.append("methodName", visitMethodRecord.methodName)
+				.append("className", getClassName())
+				.append("methodName", getMethodName())
 				.append("line", currentLine);
 		if (visitMethodRecord.signature != null) {
 			doc = doc.append("methodSignature", visitMethodRecord.signature);
 		}
 		return doc;
 	}
+
+	String getMethodName() {
+		return visitMethodRecord.methodName;
+	}
+
+	String getClassName() {
+		return visitClassRecord.name.replace('/', '.');
+	}
+
+	int getCurrentLine() {
+		return currentLine;
+	}
+
 }

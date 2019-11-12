@@ -31,4 +31,12 @@ class TMockOperation extends TestingArtifact {
 				.append("targetLocation", targetLocation.toDocument());
 	}
 
+	SourceLocation getSourceLocation() {
+		return sourceLocation;
+	}
+
+	TargetLocation getTargetLocation() {
+		return targetLocation;
+	}
+
 }

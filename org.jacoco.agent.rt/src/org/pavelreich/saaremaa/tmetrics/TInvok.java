@@ -12,6 +12,7 @@
 package org.pavelreich.saaremaa.tmetrics;
 
 import org.bson.Document;
+import org.jacoco.core.internal.instr.InstrSupport;
 
 class TInvok extends TestingArtifact {
 
@@ -32,5 +33,18 @@ class TInvok extends TestingArtifact {
 				.append("sourceLocation", sourceLocation.toDocument())
 				.append("targetLocation", targetLocation.toDocument())
 				.append("opcode", opcode);
+	}
+
+	TargetLocation getTargetLocation() {
+		return targetLocation;
+	}
+
+	SourceLocation getSourceLocation() {
+		return sourceLocation;
+	}
+
+	boolean isJacocoInit() {
+		return targetLocation != null && InstrSupport.INITMETHOD_NAME
+				.equals(targetLocation.getMethodName());
 	}
 }

@@ -36,4 +36,12 @@ class TargetLocation {
 				.append("className", className).append("descriptor", descriptor)
 				.append("methodName", methodName);
 	}
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public String getClassName() {
+		return className;
+	}
 }

@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.pavelreich.saaremaa.tmetrics;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -82,18 +81,23 @@ public class TestMetricsCollector {
 
 	}
 
-	public static List<Document> dumpTestingArtifacts()
-			throws FileNotFoundException {
+	public static List<Document> dumpTestingArtifacts() throws IOException {
 		final String fname = baseFileName.replaceAll(".exec", "-result.json");
+		final String csvFname = baseFileName.replaceAll(".exec",
+				"-tmetrics.csv");
 		final PrintWriter jsonWriter = new PrintWriter(fname);
+		final TMetricsReporter reporter = new TMetricsReporter(csvFname);
 		LOG.info("dumpTestingArtifacts: " + fname);
 		final JsonWriterSettings writerSettings = JsonWriterSettings.builder()
 				.indent(true).build();
 		final List<Document> docs = new ArrayList<Document>();
+
 		for (final TestingArtifact s : occurences) {
 			docs.add(s.toDocument());
+			reporter.process(s);
 		}
 		LOG.info("docs: " + docs.size());
+		reporter.flush();
 
 		final BsonTypeClassMap bsonTypeClassMap = new BsonTypeClassMap();
 		final CodecRegistry registry = CodecRegistries.fromProviders(
@@ -111,6 +115,7 @@ public class TestMetricsCollector {
 
 		bsonWriter.flush();
 		jsonWriter.close();
+
 		return docs;
 	}
 

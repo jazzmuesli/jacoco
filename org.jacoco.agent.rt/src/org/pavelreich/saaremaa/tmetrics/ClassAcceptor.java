@@ -12,10 +12,20 @@
 package org.pavelreich.saaremaa.tmetrics;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.jacoco.agent.rt.internal.IExceptionLogger;
 
 /**
  * is class X relevant as a prod or test class?
@@ -27,10 +37,16 @@ import java.util.Set;
  */
 public class ClassAcceptor {
 	public static final Set<String> relevantClasses = new HashSet<String>();
-	private final Logger logger;
 	private final String jacocoDestFilename;
 	private final String packageName = TestMetricsCollector.class.getPackage()
 			.getName();
+	private final Logger logger;
+
+	public static void main(final String[] args) {
+		final ClassAcceptor acceptor = new ClassAcceptor("target/jacoco.exec",
+				new Logger(new PrintWriter(System.out),
+						IExceptionLogger.SYSTEM_ERR));
+	}
 
 	public ClassAcceptor(final String jacocoDestFilename, final Logger logger) {
 		this.logger = logger;
@@ -38,7 +54,50 @@ public class ClassAcceptor {
 		loadClasses(new File(
 				jacocoDestFilename.replaceAll(".exec", "-classes.txt")));
 		loadClasses(new File("classes.txt"));
+		loadClassCSV(new File("."));
 		logger.info("loaded " + relevantClasses.size() + " classes in total");
+	}
+
+	private void loadClassCSV(final File f) {
+		if (f == null || !f.exists()) {
+			return;
+		}
+		f.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(final File pathname) {
+				if (pathname.isDirectory()) {
+					loadClassCSV(pathname);
+				}
+				if (pathname.getName().contains("class.csv")) {
+					CSVParser parser;
+					try {
+						parser = CSVParser.parse(pathname,
+								Charset.defaultCharset(),
+								CSVFormat.DEFAULT.withFirstRecordAsHeader());
+						final List<CSVRecord> records = parser.getRecords();
+						int i = 0;
+						for (final CSVRecord record : records) {
+							final String className = record.get("class");
+							if (className != null
+									&& !className.trim().isEmpty()) {
+								if (!relevantClasses.add(className)) {
+									i++;
+								}
+							}
+
+						}
+						logger.info(
+								"Loaded " + i + " classes from " + pathname);
+						parser.close();
+					} catch (final IOException e) {
+						logger.logExeption(e);
+					}
+
+				}
+				return false;
+			}
+		});
 	}
 
 	private void loadClasses(final File f) {

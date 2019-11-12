@@ -46,9 +46,10 @@ public class TracingInstrumenterFactory implements InstrumenterFactory {
 	}
 
 	protected ClassVisitor chainVisitor(final ClassVisitor nextVisitor) {
+		Logger logger = Logger.provideLogger(exceptionLogger,
+				jacocoDestFileName);
 		final ClassVisitor metricsVisitor = TestMetricsCollector
-				.provideClassVisitor(nextVisitor, jacocoDestFileName, Logger
-						.provideLogger(exceptionLogger, jacocoDestFileName));
+				.provideClassVisitor(nextVisitor, jacocoDestFileName, logger);
 		return metricsVisitor;
 	}
 }

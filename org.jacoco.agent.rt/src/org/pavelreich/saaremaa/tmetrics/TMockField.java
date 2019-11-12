@@ -26,8 +26,20 @@ class TMockField extends TestingArtifact {
 
 	@Override
 	public Document toDocument() {
-		return super.toDocument().append("className", visitClassRecord.name)
-				.append("fieldName", visitFieldRecord.name)
-				.append("fieldType", visitFieldRecord.descriptor);
+		return super.toDocument().append("className", getClassName())
+				.append("fieldName", getFieldName())
+				.append("fieldType", getFieldType());
+	}
+
+	String getFieldType() {
+		return visitFieldRecord.descriptor;
+	}
+
+	String getFieldName() {
+		return visitFieldRecord.name;
+	}
+
+	String getClassName() {
+		return visitClassRecord.name;
 	}
 }
