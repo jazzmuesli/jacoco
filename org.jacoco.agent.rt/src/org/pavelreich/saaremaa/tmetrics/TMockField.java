@@ -32,7 +32,11 @@ class TMockField extends TestingArtifact {
 	}
 
 	String getFieldType() {
-		return visitFieldRecord.descriptor;
+		// transform to className
+		// https://stackoverflow.com/questions/3442090/what-is-this-ljava-lang-object
+		// I don't expect any other types
+		final String type = visitFieldRecord.descriptor;
+		return type.replaceAll("^L", "").replaceAll(";$", "").replace('/', '.');
 	}
 
 	String getFieldName() {
@@ -40,6 +44,6 @@ class TMockField extends TestingArtifact {
 	}
 
 	String getClassName() {
-		return visitClassRecord.name;
+		return visitClassRecord.name.replace('/', '.');
 	}
 }

@@ -36,7 +36,7 @@ public class TMetricsReporter {
 			final TInvok tinvok = (TInvok) s;
 			final SourceLocation sourceLocation = tinvok.getSourceLocation();
 			final TargetLocation targetLocation = tinvok.getTargetLocation();
-			if (testClassName == null && tinvok.isJacocoInit()) {
+			if (tinvok.isJacocoInit()) {
 				testClassName = targetLocation.getClassName();
 				prodClassName = testClassName.replaceAll("Test$", "");
 			} else if (testClassName != null
@@ -61,7 +61,8 @@ public class TMetricsReporter {
 					.equals(InstrSupport.INITMETHOD_NAME)) {
 				return;
 			}
-			printer.printRecord(testClassName, sourceLocation.getMethodName(),
+			printer.printRecord(sourceLocation.getClassName(),
+					sourceLocation.getMethodName(),
 					sourceLocation.getCurrentLine(), "TASSERT",
 					tassert.getTargetLocation().getClassName(),
 					tassert.getTargetLocation().getMethodName());
@@ -69,7 +70,8 @@ public class TMetricsReporter {
 		} else if (s instanceof TData) {
 			final TData tData = (TData) s;
 			final SourceLocation sourceLocation = tData.getSourceLocation();
-			printer.printRecord(testClassName, sourceLocation.getMethodName(),
+			printer.printRecord(sourceLocation.getClassName(),
+					sourceLocation.getMethodName(),
 					sourceLocation.getCurrentLine(), "TDATA",
 					tData.getDataType(), "");
 		} else if (s instanceof TMockField) {

@@ -34,6 +34,6 @@ class TData extends TestingArtifact {
 	}
 
 	String getDataType() {
-		return type;
+		return type.replace('/', '.');
 	}
 }
