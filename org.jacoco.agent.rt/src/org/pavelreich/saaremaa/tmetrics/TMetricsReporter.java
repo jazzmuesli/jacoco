@@ -18,13 +18,13 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jacoco.core.internal.instr.InstrSupport;
 
-public class TMetricsReporter {
+class TMetricsReporter {
 
 	private final CSVPrinter printer;
 	private String testClassName = null;
 	private String prodClassName = null;
 
-	public TMetricsReporter(final String csvFname) throws IOException {
+	TMetricsReporter(final String csvFname) throws IOException {
 		this.printer = new CSVPrinter(new FileWriter(csvFname),
 				CSVFormat.DEFAULT);
 		printer.printRecord("testClassName", "testMethodName", "testClassLine",
@@ -39,7 +39,7 @@ public class TMetricsReporter {
 			if (tinvok.isJacocoInit()) {
 				testClassName = targetLocation.getClassName();
 				prodClassName = testClassName.replaceAll("Test$", "");
-			} else if (testClassName != null
+			} else if (testClassName != null && testClassName.endsWith("Test")
 					&& sourceLocation.getClassName().equals(testClassName)
 					&& targetLocation.getClassName().equals(prodClassName)) {
 				printer.printRecord(testClassName,
@@ -70,6 +70,9 @@ public class TMetricsReporter {
 		} else if (s instanceof TData) {
 			final TData tData = (TData) s;
 			final SourceLocation sourceLocation = tData.getSourceLocation();
+			if (!sourceLocation.getClassName().endsWith("Test")) {
+				return;
+			}
 			printer.printRecord(sourceLocation.getClassName(),
 					sourceLocation.getMethodName(),
 					sourceLocation.getCurrentLine(), "TDATA",
@@ -79,19 +82,20 @@ public class TMetricsReporter {
 			printer.printRecord(tMockField.getClassName(), "", 0, "TMOCKFIELD",
 					tMockField.getFieldType(), tMockField.getFieldName());
 		} else if (s instanceof TMockOperation) {
-			final TMockOperation tMockField = (TMockOperation) s;
-			final SourceLocation sourceLocation = tMockField
+			final TMockOperation tMockOperation = (TMockOperation) s;
+			final SourceLocation sourceLocation = tMockOperation
 					.getSourceLocation();
-			final TargetLocation targetLocation = tMockField
+			final TargetLocation targetLocation = tMockOperation
 					.getTargetLocation();
-			if (tMockField.getTargetLocation().getMethodName()
+			if (tMockOperation.getTargetLocation().getMethodName()
 					.equals(InstrSupport.INITMETHOD_NAME)
 					|| sourceLocation.getClassName()
 							.startsWith("org.mockito")) {
 				return;
 			}
 
-			printer.printRecord(testClassName, sourceLocation.getMethodName(),
+			printer.printRecord(sourceLocation.getClassName(),
+					sourceLocation.getMethodName(),
 					sourceLocation.getCurrentLine(), "TMOCKOP",
 					targetLocation.getClassName(),
 					targetLocation.getMethodName());
