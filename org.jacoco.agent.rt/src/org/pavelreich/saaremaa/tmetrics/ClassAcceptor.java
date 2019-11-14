@@ -75,6 +75,22 @@ public class ClassAcceptor {
 								Charset.defaultCharset(),
 								CSVFormat.DEFAULT.withDelimiter(';')
 										.withFirstRecordAsHeader());
+						Integer classId = parser.getHeaderMap().get("class");
+						if (classId == null) {
+							logger.info(
+									"class not found in semicolon-separated "
+											+ parser.getHeaderMap().keySet());
+							parser = CSVParser.parse(pathname,
+									Charset.defaultCharset(), CSVFormat.DEFAULT
+											.withFirstRecordAsHeader());
+							classId = parser.getHeaderMap().get("class");
+							logger.info("Loading " + pathname
+									+ " as comma-separated, found class as "
+									+ classId);
+						} else {
+							logger.info("Loading " + pathname
+									+ " as semicolon-separated");
+						}
 						final List<CSVRecord> records = parser.getRecords();
 						int i = 0;
 						for (final CSVRecord record : records) {
