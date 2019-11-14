@@ -14,7 +14,6 @@ package org.pavelreich.saaremaa.tmetrics;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.HashSet;
@@ -74,7 +73,8 @@ public class ClassAcceptor {
 					try {
 						parser = CSVParser.parse(pathname,
 								Charset.defaultCharset(),
-								CSVFormat.DEFAULT.withFirstRecordAsHeader());
+								CSVFormat.DEFAULT.withDelimiter(';')
+										.withFirstRecordAsHeader());
 						final List<CSVRecord> records = parser.getRecords();
 						int i = 0;
 						for (final CSVRecord record : records) {
@@ -90,7 +90,7 @@ public class ClassAcceptor {
 						logger.info(
 								"Loaded " + i + " classes from " + pathname);
 						parser.close();
-					} catch (final IOException e) {
+					} catch (final Exception e) {
 						logger.logExeption(e);
 					}
 
