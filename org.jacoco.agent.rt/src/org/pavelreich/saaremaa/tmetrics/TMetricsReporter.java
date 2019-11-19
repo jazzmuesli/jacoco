@@ -31,6 +31,12 @@ class TMetricsReporter {
 				"metricType", "prodClassName", "prodMethodName");
 	}
 
+	static String getProdClassName(final String testClassName) {
+		final String prodClassName = testClassName.replaceAll("_ESTest$", "")
+				.replaceAll("Test$", "").replaceAll("\\.Test", ".");
+		return prodClassName;
+	}
+
 	void process(final TestingArtifact s) throws IOException {
 		if (s instanceof TInvok) {
 			final TInvok tinvok = (TInvok) s;
@@ -38,8 +44,8 @@ class TMetricsReporter {
 			final TargetLocation targetLocation = tinvok.getTargetLocation();
 			if (tinvok.isJacocoInit()) {
 				testClassName = targetLocation.getClassName();
-				prodClassName = testClassName.replaceAll("Test$", "");
-			} else if (testClassName != null && testClassName.endsWith("Test")
+				prodClassName = getProdClassName(testClassName);
+			} else if (testClassName != null && isTest(testClassName)
 					&& sourceLocation.getClassName().equals(testClassName)
 					&& targetLocation.getClassName().equals(prodClassName)) {
 				printer.printRecord(testClassName,
@@ -100,6 +106,10 @@ class TMetricsReporter {
 					targetLocation.getClassName(),
 					targetLocation.getMethodName());
 		}
+	}
+
+	static boolean isTest(final String tcn) {
+		return tcn.contains(".Test") || tcn.endsWith("Test");
 	}
 
 	public void flush() throws IOException {
