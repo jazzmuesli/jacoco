@@ -109,7 +109,8 @@ class TMetricsReporter {
 	}
 
 	static boolean isTest(final String tcn) {
-		return tcn.contains(".Test") || tcn.endsWith("Test");
+		return tcn.contains(".Test") || tcn.endsWith("Test")
+				|| tcn.endsWith("TestCase");
 	}
 
 	public void flush() throws IOException {

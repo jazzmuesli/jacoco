@@ -24,7 +24,8 @@ class TestObservingMethodVisitor extends MethodVisitor {
 
 	private static final Set<String> ASSERT_CLASSES = new HashSet<String>(
 			Arrays.asList("org.junit.Assert", "junit.framework.Assert",
-					"org.hamcrest.Matchers", "org.hamcrest.MatcherAssert"));
+					"org.hamcrest.Matchers", "org.hamcrest.MatcherAssert",
+					"org.junit.jupiter.api.Assertions"));
 	private static final Set<String> MOCKITO_CLASSES = new HashSet<String>(
 			Arrays.asList("org.mockito.Mockito"));
 
