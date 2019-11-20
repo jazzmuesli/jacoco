@@ -16,9 +16,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.bson.BsonWriter;
 import org.bson.Document;
@@ -56,7 +56,7 @@ import org.objectweb.asm.Opcodes;
  *
  */
 public class TestMetricsCollector {
-	public static final Collection<TestingArtifact> occurences = new LinkedHashSet<TestingArtifact>();
+	public static final Collection<TestingArtifact> occurences = new CopyOnWriteArraySet<TestingArtifact>();
 	public static final int ASM_VERSION = Opcodes.ASM7;
 
 	public static final Set<String> relevantClasses = new HashSet<String>();
