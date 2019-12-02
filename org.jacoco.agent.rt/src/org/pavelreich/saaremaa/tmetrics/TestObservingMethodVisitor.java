@@ -53,7 +53,9 @@ class TestObservingMethodVisitor extends MethodVisitor {
 			TestMetricsCollector.occurences
 					.add(new TAssert(getSourceLocation(), new TargetLocation(
 							ownerClassName, methodName, descriptor)));
-		} else if ("junit.framework.TestCase".equals(ownerClassName)
+		}
+		// junit3
+		if (ownerClassName.equals(getSourceLocation().getClassName())
 				&& methodName.toLowerCase().contains("assert")) {
 			TestMetricsCollector.occurences
 					.add(new TAssert(getSourceLocation(), new TargetLocation(
