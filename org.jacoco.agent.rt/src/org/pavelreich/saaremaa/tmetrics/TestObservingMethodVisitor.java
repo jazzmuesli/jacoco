@@ -53,6 +53,12 @@ class TestObservingMethodVisitor extends MethodVisitor {
 			TestMetricsCollector.occurences
 					.add(new TAssert(getSourceLocation(), new TargetLocation(
 							ownerClassName, methodName, descriptor)));
+		} else if ("junit.framework.TestCase".equals(ownerClassName)
+				&& methodName.toLowerCase().contains("assert")) {
+			TestMetricsCollector.occurences
+					.add(new TAssert(getSourceLocation(), new TargetLocation(
+							ownerClassName, methodName, descriptor)));
+
 		}
 		if (MOCKITO_CLASSES.contains(ownerClassName)) {
 			TestMetricsCollector.occurences.add(
