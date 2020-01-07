@@ -121,6 +121,12 @@ public class ClassAcceptor {
 		f.listFiles(new MyClassCSVFilter(logger));
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " knows about " + relevantClasses.size()
+				+ " classes";
+	}
+
 	private static void loadClasses(final File f, final Logger logger) {
 		if (f.exists()) {
 			Scanner scnr;
@@ -152,6 +158,9 @@ public class ClassAcceptor {
 		final String replacedName = ownerClassName.replace('/', '.');
 		final boolean isClassRelevant = replacedName.startsWith(packageName);
 		final String withoutInnerClass = replacedName.replaceAll("\\$.*", "");
+		if (withoutInnerClass.startsWith("org.pavelreich.saaremaa.tmetrics")) {
+			return false;
+		}
 		return isClassRelevant || relevantClasses.contains(withoutInnerClass);
 	}
 

@@ -15,9 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.bson.BsonWriter;
@@ -59,7 +57,6 @@ public class TestMetricsCollector {
 	public static final Collection<TestingArtifact> occurences = new CopyOnWriteArraySet<TestingArtifact>();
 	public static final int ASM_VERSION = Opcodes.ASM7;
 
-	public static final Set<String> relevantClasses = new HashSet<String>();
 	public static String baseFileName = "banana.exec";
 	private static Logger LOG = Logger.defaultLogger();
 	private static ClassAcceptor classManager;
@@ -138,8 +135,11 @@ public class TestMetricsCollector {
 			TestMetricsCollector.baseFileName = jacocoDestFilename;
 			TestMetricsCollector.LOG = logger;
 			if (TestMetricsCollector.classManager == null) {
+				logger.info("Creating classManager");
 				TestMetricsCollector.classManager = new ClassAcceptor(
 						jacocoDestFilename, logger);
+			} else {
+				logger.info("Reusing classManager:" + classManager);
 			}
 			return new TestObservingClassVisitor(nextVisitor, classManager);
 
