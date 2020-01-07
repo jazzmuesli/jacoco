@@ -62,6 +62,7 @@ public class TestMetricsCollector {
 	public static final Set<String> relevantClasses = new HashSet<String>();
 	public static String baseFileName = "banana.exec";
 	private static Logger LOG = Logger.defaultLogger();
+	private static ClassAcceptor classManager;
 
 	public static void main(final String[] args) {
 		ClassReader reader;
@@ -136,8 +137,10 @@ public class TestMetricsCollector {
 					+ jacocoDestFilename);
 			TestMetricsCollector.baseFileName = jacocoDestFilename;
 			TestMetricsCollector.LOG = logger;
-			final ClassAcceptor classManager = new ClassAcceptor(
-					jacocoDestFilename, logger);
+			if (TestMetricsCollector.classManager == null) {
+				TestMetricsCollector.classManager = new ClassAcceptor(
+						jacocoDestFilename, logger);
+			}
 			return new TestObservingClassVisitor(nextVisitor, classManager);
 
 		} catch (final Exception e) {

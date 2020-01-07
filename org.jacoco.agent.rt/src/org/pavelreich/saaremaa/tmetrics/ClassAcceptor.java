@@ -35,6 +35,61 @@ import org.jacoco.agent.rt.internal.IExceptionLogger;
  *
  */
 public class ClassAcceptor {
+	private static final class MyClassCSVFilter implements FileFilter {
+		private final Logger logger;
+
+		public MyClassCSVFilter(final Logger logger) {
+			this.logger = logger;
+		}
+
+		@Override
+		public boolean accept(final File pathname) {
+			if (pathname.isDirectory()) {
+				loadClassCSV(pathname, logger);
+			}
+			if (pathname.getName().contains("class.csv")) {
+				CSVParser parser;
+				try {
+					parser = CSVParser.parse(pathname, Charset.defaultCharset(),
+							CSVFormat.DEFAULT.withDelimiter(';')
+									.withFirstRecordAsHeader());
+					Integer classId = parser.getHeaderMap().get("class");
+					if (classId == null) {
+						logger.info("class not found in semicolon-separated "
+								+ parser.getHeaderMap().keySet());
+						parser = CSVParser.parse(pathname,
+								Charset.defaultCharset(),
+								CSVFormat.DEFAULT.withFirstRecordAsHeader());
+						classId = parser.getHeaderMap().get("class");
+						logger.info("Loading " + pathname
+								+ " as comma-separated, found class as "
+								+ classId);
+					} else {
+						logger.info("Loading " + pathname
+								+ " as semicolon-separated");
+					}
+					final List<CSVRecord> records = parser.getRecords();
+					int i = 0;
+					for (final CSVRecord record : records) {
+						final String className = record.get("class");
+						if (className != null && !className.trim().isEmpty()) {
+							if (!relevantClasses.add(className)) {
+								i++;
+							}
+						}
+
+					}
+					logger.info("Loaded " + i + " classes from " + pathname);
+					parser.close();
+				} catch (final Exception e) {
+					logger.logExeption(e);
+				}
+
+			}
+			return false;
+		}
+	}
+
 	public static final Set<String> relevantClasses = new HashSet<String>();
 	private final String jacocoDestFilename;
 	private final String packageName = TestMetricsCollector.class.getPackage()
@@ -50,73 +105,23 @@ public class ClassAcceptor {
 	public ClassAcceptor(final String jacocoDestFilename, final Logger logger) {
 		this.logger = logger;
 		this.jacocoDestFilename = jacocoDestFilename;
-		loadClasses(new File(
-				jacocoDestFilename.replaceAll(".exec", "-classes.txt")));
-		loadClasses(new File("classes.txt"));
-		loadClassCSV(new File("."));
+		loadClasses(
+				new File(
+						jacocoDestFilename.replaceAll(".exec", "-classes.txt")),
+				logger);
+		loadClasses(new File("classes.txt"), logger);
+		loadClassCSV(new File("."), logger);
 		logger.info("loaded " + relevantClasses.size() + " classes in total");
 	}
 
-	private void loadClassCSV(final File f) {
+	private static void loadClassCSV(final File f, final Logger logger) {
 		if (f == null || !f.exists()) {
 			return;
 		}
-		f.listFiles(new FileFilter() {
-
-			@Override
-			public boolean accept(final File pathname) {
-				if (pathname.isDirectory()) {
-					loadClassCSV(pathname);
-				}
-				if (pathname.getName().contains("class.csv")) {
-					CSVParser parser;
-					try {
-						parser = CSVParser.parse(pathname,
-								Charset.defaultCharset(),
-								CSVFormat.DEFAULT.withDelimiter(';')
-										.withFirstRecordAsHeader());
-						Integer classId = parser.getHeaderMap().get("class");
-						if (classId == null) {
-							logger.info(
-									"class not found in semicolon-separated "
-											+ parser.getHeaderMap().keySet());
-							parser = CSVParser.parse(pathname,
-									Charset.defaultCharset(), CSVFormat.DEFAULT
-											.withFirstRecordAsHeader());
-							classId = parser.getHeaderMap().get("class");
-							logger.info("Loading " + pathname
-									+ " as comma-separated, found class as "
-									+ classId);
-						} else {
-							logger.info("Loading " + pathname
-									+ " as semicolon-separated");
-						}
-						final List<CSVRecord> records = parser.getRecords();
-						int i = 0;
-						for (final CSVRecord record : records) {
-							final String className = record.get("class");
-							if (className != null
-									&& !className.trim().isEmpty()) {
-								if (!relevantClasses.add(className)) {
-									i++;
-								}
-							}
-
-						}
-						logger.info(
-								"Loaded " + i + " classes from " + pathname);
-						parser.close();
-					} catch (final Exception e) {
-						logger.logExeption(e);
-					}
-
-				}
-				return false;
-			}
-		});
+		f.listFiles(new MyClassCSVFilter(logger));
 	}
 
-	private void loadClasses(final File f) {
+	private static void loadClasses(final File f, final Logger logger) {
 		if (f.exists()) {
 			Scanner scnr;
 			try {
