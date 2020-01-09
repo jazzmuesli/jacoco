@@ -24,10 +24,12 @@ import org.objectweb.asm.ClassVisitor;
 public class TracingInstrumenterFactory implements InstrumenterFactory {
 	private final String jacocoDestFileName;
 	private final IExceptionLogger exceptionLogger;
+	private final boolean collectTmetrics;
 
 	public TracingInstrumenterFactory(final AgentOptions agentOptions,
 			final IExceptionLogger exceptionLogger) {
 		this.jacocoDestFileName = agentOptions.getDestfile();
+		this.collectTmetrics = agentOptions.getCollectTMetrics();
 		this.exceptionLogger = exceptionLogger;
 	}
 
@@ -46,10 +48,11 @@ public class TracingInstrumenterFactory implements InstrumenterFactory {
 	}
 
 	protected ClassVisitor chainVisitor(final ClassVisitor nextVisitor) {
-		Logger logger = Logger.provideLogger(exceptionLogger,
+		final Logger logger = Logger.provideLogger(exceptionLogger,
 				jacocoDestFileName);
 		final ClassVisitor metricsVisitor = TestMetricsCollector
-				.provideClassVisitor(nextVisitor, jacocoDestFileName, logger);
+				.provideClassVisitor(nextVisitor, jacocoDestFileName, logger,
+						collectTmetrics);
 		return metricsVisitor;
 	}
 }

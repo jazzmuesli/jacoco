@@ -55,4 +55,48 @@ class SourceLocation {
 		return currentLine;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + currentLine;
+		result = prime * result + ((visitClassRecord == null) ? 0
+				: visitClassRecord.hashCode());
+		result = prime * result + ((visitMethodRecord == null) ? 0
+				: visitMethodRecord.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final SourceLocation other = (SourceLocation) obj;
+		if (currentLine != other.currentLine) {
+			return false;
+		}
+		if (visitClassRecord == null) {
+			if (other.visitClassRecord != null) {
+				return false;
+			}
+		} else if (!visitClassRecord.equals(other.visitClassRecord)) {
+			return false;
+		}
+		if (visitMethodRecord == null) {
+			if (other.visitMethodRecord != null) {
+				return false;
+			}
+		} else if (!visitMethodRecord.equals(other.visitMethodRecord)) {
+			return false;
+		}
+		return true;
+	}
+
 }

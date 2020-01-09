@@ -46,4 +46,45 @@ class TMockField extends TestingArtifact {
 	String getClassName() {
 		return visitClassRecord.name.replace('/', '.');
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((visitClassRecord == null) ? 0
+				: visitClassRecord.hashCode());
+		result = prime * result + ((visitFieldRecord == null) ? 0
+				: visitFieldRecord.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final TMockField other = (TMockField) obj;
+		if (visitClassRecord == null) {
+			if (other.visitClassRecord != null) {
+				return false;
+			}
+		} else if (!visitClassRecord.equals(other.visitClassRecord)) {
+			return false;
+		}
+		if (visitFieldRecord == null) {
+			if (other.visitFieldRecord != null) {
+				return false;
+			}
+		} else if (!visitFieldRecord.equals(other.visitFieldRecord)) {
+			return false;
+		}
+		return true;
+	}
+
 }

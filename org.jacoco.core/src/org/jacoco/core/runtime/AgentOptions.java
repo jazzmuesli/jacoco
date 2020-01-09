@@ -189,10 +189,12 @@ public final class AgentOptions {
 	 */
 	public static final String JMX = "jmx";
 
+	public static final String TMETRICS = "tmetrics";
+
 	private static final Collection<String> VALID_OPTIONS = Arrays.asList(
 			DESTFILE, APPEND, INCLUDES, EXCLUDES, EXCLCLASSLOADER,
 			INCLBOOTSTRAPCLASSES, INCLNOLOCATIONCLASSES, SESSIONID, DUMPONEXIT,
-			OUTPUT, ADDRESS, PORT, CLASSDUMPDIR, JMX);
+			OUTPUT, ADDRESS, PORT, CLASSDUMPDIR, JMX, TMETRICS);
 
 	private final Map<String, String> options;
 
@@ -545,6 +547,15 @@ public final class AgentOptions {
 	 */
 	public boolean getJmx() {
 		return getOption(JMX, false);
+	}
+
+	/**
+	 * collect tmetrics using TestMetricsCollector
+	 *
+	 * @return
+	 */
+	public boolean getCollectTMetrics() {
+		return getOption(TMETRICS, true);
 	}
 
 	/**

@@ -66,7 +66,7 @@ public class TestMetricsCollector {
 		try {
 			reader = new ClassReader(TestMetricsCollector.class.getName());
 			final ClassVisitor visitor = TestMetricsCollector
-					.provideClassVisitor(null, baseFileName, LOG);
+					.provideClassVisitor(null, baseFileName, LOG, true);
 			reader.accept(visitor, 0);
 			final List<Document> dumpTestingArtifacts = dumpTestingArtifacts();
 			for (final Document ta : dumpTestingArtifacts) {
@@ -124,16 +124,21 @@ public class TestMetricsCollector {
 	 * @param nextVisitor
 	 * @param jacocoDestFilename
 	 * @param logger
+	 * @param collectTmetrics
 	 * @return
 	 */
 	public static ClassVisitor provideClassVisitor(
 			final ClassVisitor nextVisitor, final String jacocoDestFilename,
-			final Logger logger) {
+			final Logger logger, final boolean collectTmetrics) {
 		try {
-			logger.info("provideClassVisitor.jacocoDestFilename="
-					+ jacocoDestFilename);
 			TestMetricsCollector.baseFileName = jacocoDestFilename;
 			TestMetricsCollector.LOG = logger;
+			logger.info("provideClassVisitor.jacocoDestFilename="
+					+ jacocoDestFilename + ", tmetrics: " + collectTmetrics);
+			if (!collectTmetrics) {
+				logger.info("don't collect TMetrics");
+				return nextVisitor;
+			}
 			if (TestMetricsCollector.classManager == null) {
 				logger.info("Creating classManager");
 				TestMetricsCollector.classManager = new ClassAcceptor(

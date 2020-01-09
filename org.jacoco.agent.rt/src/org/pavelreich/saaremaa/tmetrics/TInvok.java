@@ -47,4 +47,49 @@ class TInvok extends TestingArtifact {
 		return targetLocation != null && InstrSupport.INITMETHOD_NAME
 				.equals(targetLocation.getMethodName());
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + opcode;
+		result = prime * result
+				+ ((sourceLocation == null) ? 0 : sourceLocation.hashCode());
+		result = prime * result
+				+ ((targetLocation == null) ? 0 : targetLocation.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final TInvok other = (TInvok) obj;
+		if (opcode != other.opcode) {
+			return false;
+		}
+		if (sourceLocation == null) {
+			if (other.sourceLocation != null) {
+				return false;
+			}
+		} else if (!sourceLocation.equals(other.sourceLocation)) {
+			return false;
+		}
+		if (targetLocation == null) {
+			if (other.targetLocation != null) {
+				return false;
+			}
+		} else if (!targetLocation.equals(other.targetLocation)) {
+			return false;
+		}
+		return true;
+	}
+
 }

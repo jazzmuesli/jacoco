@@ -39,4 +39,45 @@ public class TAssert extends TestingArtifact {
 	public TargetLocation getTargetLocation() {
 		return targetLocation;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((sourceLocation == null) ? 0 : sourceLocation.hashCode());
+		result = prime * result
+				+ ((targetLocation == null) ? 0 : targetLocation.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final TAssert other = (TAssert) obj;
+		if (sourceLocation == null) {
+			if (other.sourceLocation != null) {
+				return false;
+			}
+		} else if (!sourceLocation.equals(other.sourceLocation)) {
+			return false;
+		}
+		if (targetLocation == null) {
+			if (other.targetLocation != null) {
+				return false;
+			}
+		} else if (!targetLocation.equals(other.targetLocation)) {
+			return false;
+		}
+		return true;
+	}
+
 }
